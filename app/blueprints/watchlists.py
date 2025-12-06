@@ -214,6 +214,41 @@ def create_watchlist():
     return redirect(url_for('watchlists.index'))
 
 
+@watchlists.route('/edit/<int:watchlist_id>', methods=['POST'])
+@login_required
+def edit_watchlist(watchlist_id):
+    """Edit a watchlist name"""
+    name = request.form.get('name', '').strip()
+
+    # Server-side validation
+    if not name:
+        flash('Watchlist name is required', 'error')
+        return redirect(url_for('watchlists.index'))
+
+    if len(name) > 100:
+        flash('Watchlist name must be 100 characters or less', 'error')
+        return redirect(url_for('watchlists.index'))
+
+    # Verify ownership
+    check_query = "SELECT name FROM watchlists WHERE id = %s AND user_id = %s"
+    watchlist = execute_query(check_query, (watchlist_id, current_user.id), fetch=True)
+
+    if not watchlist:
+        flash('Watchlist not found', 'error')
+        return redirect(url_for('watchlists.index'))
+
+    # Update watchlist name
+    update_query = "UPDATE watchlists SET name = %s WHERE id = %s AND user_id = %s"
+    result = execute_query(update_query, (name, watchlist_id, current_user.id), fetch=False)
+
+    if result is not None:
+        flash(f'Watchlist renamed to "{name}"', 'success')
+    else:
+        flash('Error updating watchlist. Name may already exist.', 'error')
+
+    return redirect(url_for('watchlists.index'))
+
+
 @watchlists.route('/delete/<int:watchlist_id>', methods=['POST'])
 @login_required
 def delete_watchlist(watchlist_id):
