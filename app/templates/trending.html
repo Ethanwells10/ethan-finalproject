@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Hero Header with Fire Image -->
+    <div class="trending-hero mb-5">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-4 mb-2">
+                    <img src="https://png.pngtree.com/png-clipart/20210704/original/pngtree-fuego-png-png-image_6502195.jpg"
+                         alt="Fire"
+                         style="width: 60px; height: 60px; margin-right: 10px;"
+                         onerror="this.style.display='none'">
+                    Trending Now
+                </h1>
+                <p class="lead mb-0" style="color: white;">Top 10 most actively traded stocks by volume</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="update-badge">
+                    <i class="fas fa-clock me-2"></i>
+                    <span id="update-time-badge" class="small" style="color: white;">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="text-center py-5">
+        <div class="spinner-border text-danger" role="status" style="width: 3rem; height: 3rem;"></div>
+        <p class="mt-3 text-muted">Analyzing market activity...</p>
+    </div>
+
+    <!-- Trending Stocks Grid -->
+    <div id="trending-grid" style="display: none;">
+        <!-- Top 3 Featured -->
+        <div class="row mb-4" id="top-three">
+            <!-- Populated by JavaScript -->
+        </div>
+
+        <!-- Remaining 7 in Cards -->
+        <div class="row" id="remaining-stocks">
+            <!-- Populated by JavaScript -->
+        </div>
+
+        <!-- Info Card -->
+        <div class="row mt-5">
+            <div class="col-md-12">
+                <div class="info-card">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-lightbulb fa-2x text-warning me-3 mt-1"></i>
+                        <div>
+                            <h5 class="mb-2">What is Trading Volume?</h5>
+                            <p class="mb-0 text-muted">
+                                Volume represents the total number of shares traded in the last 24 hours.
+                                High volume indicates strong investor interest and can signal potential price movements or important market events.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error State -->
+    <div id="error-state" style="display: none;">
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <strong>Error loading trending stocks.</strong> Please try again later.
+        </div>
+    </div>
+</div>
+
+<style>
+.trending-hero {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    padding: 2rem;
+    border-radius: 15px;
+    color: white;
+    box-shadow: 0 10px 30px rgba(30, 60, 114, 0.3);
+}
+
+.trending-hero h1 {
+    color: white;
+    font-weight: 700;
+}
+
+.trending-hero .lead {
+    color: white !important;
+}
+
+.update-badge {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    color: white;
+}
+
+.stock-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.stock-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.stock-card.featured {
+    background: linear-gradient(135deg, #134e5e 0%, #71b280 100%);
+    color: white;
+    box-shadow: 0 5px 20px rgba(19, 78, 94, 0.4);
+}
+
+.stock-card.featured h3,
+.stock-card.featured .text-muted {
+    color: white !important;
+}
+
+.stock-card.featured .badge {
+    background: rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+}
+
+.rank-badge {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.rank-1 {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);
+}
+
+.rank-2 {
+    background: linear-gradient(135deg, #C0C0C0, #808080);
+    color: white;
+    box-shadow: 0 4px 15px rgba(192, 192, 192, 0.5);
+}
+
+.rank-3 {
+    background: linear-gradient(135deg, #CD7F32, #8B4513);
+    color: white;
+    box-shadow: 0 4px 15px rgba(205, 127, 50, 0.5);
+}
+
+.rank-other {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.volume-display {
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.volume-number {
+    color: inherit;
+}
+
+.stock-card.featured .volume-display {
+    color: white;
+}
+
+.info-card {
+    background: linear-gradient(135deg, #fff5e6 0%, #ffe6cc 100%);
+    border-radius: 12px;
+    padding: 2rem;
+    border-left: 5px solid #ffc107;
+}
+
+.stock-symbol {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.stock-name {
+    color: #6c757d;
+    font-size: 0.95rem;
+    margin-bottom: 1rem;
+}
+
+.stock-card.featured .stock-name {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.view-chart-btn {
+    width: 100%;
+    border-radius: 8px;
+    padding: 0.6rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.view-chart-btn:hover {
+    transform: scale(1.05);
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    loadTrendingStocks();
+});
+
+function loadTrendingStocks() {
+    // Demo data showing typical trending stocks by volume
+    const mockStocks = [
+        { symbol: 'AAPL', name: 'Apple Inc', volume: 52430000 },
+        { symbol: 'TSLA', name: 'Tesla Inc', volume: 48250000 },
+        { symbol: 'NVDA', name: 'NVIDIA Corporation', volume: 45120000 },
+        { symbol: 'AMD', name: 'Advanced Micro Devices', volume: 38900000 },
+        { symbol: 'MSFT', name: 'Microsoft Corporation', volume: 35670000 },
+        { symbol: 'AMZN', name: 'Amazon.com Inc', volume: 32450000 },
+        { symbol: 'META', name: 'Meta Platforms Inc', volume: 28340000 },
+        { symbol: 'GOOGL', name: 'Alphabet Inc', volume: 25890000 },
+        { symbol: 'SPY', name: 'S&P 500 ETF', volume: 24560000 },
+        { symbol: 'QQQ', name: 'NASDAQ 100 ETF', volume: 22130000 }
+    ];
+
+    displayTrendingStocks(mockStocks);
+}
+
+function displayTrendingStocks(stocks) {
+    $('#loading').hide();
+    $('#trending-grid').show();
+
+    const topThree = $('#top-three');
+    const remaining = $('#remaining-stocks');
+
+    topThree.empty();
+    remaining.empty();
+
+    stocks.forEach((stock, index) => {
+        let rankClass = 'rank-other';
+        if (index === 0) rankClass = 'rank-1';
+        else if (index === 1) rankClass = 'rank-2';
+        else if (index === 2) rankClass = 'rank-3';
+
+        const card = `
+            <div class="col-md-${index < 3 ? '4' : '6'} mb-4">
+                <div class="stock-card ${index < 3 ? 'featured' : ''}">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="rank-badge ${rankClass}">
+                            ${index + 1}
+                        </div>
+                        <div class="text-end flex-grow-1 ms-3">
+                            <div class="stock-symbol">${stock.symbol}</div>
+                            <div class="stock-name">${stock.name}</div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <small class="${index < 3 ? 'text-white' : 'text-muted'} d-block mb-2">24h Trading Volume</small>
+                        <div class="volume-display mb-2">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            <span class="volume-number">${formatVolume(stock.volume)}</span>
+                        </div>
+                    </div>
+
+                    <a href="/tickers/view/${stock.symbol}" class="btn ${index < 3 ? 'btn-light' : 'btn-primary'} view-chart-btn">
+                        <i class="fas fa-chart-line me-2"></i>View Chart & Price
+                    </a>
+                </div>
+            </div>
+        `;
+
+        if (index < 3) {
+            topThree.append(card);
+        } else {
+            remaining.append(card);
+        }
+    });
+
+    // Update timestamp
+    const now = new Date();
+    $('#update-time-badge').text(`Updated ${now.toLocaleTimeString()}`);
+}
+
+function formatVolume(volume) {
+    if (volume >= 1000000) {
+        return (volume / 1000000).toFixed(1) + 'M';
+    } else if (volume >= 1000) {
+        return (volume / 1000).toFixed(1) + 'K';
+    }
+    return volume.toString();
+}
+</script>
+{% endblock %}

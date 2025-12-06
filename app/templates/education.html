@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Hero Header -->
+    <div class="education-hero mb-5">
+        <div class="row align-items-center">
+            <div class="col-md-12 text-center">
+                <h1 class="display-4 mb-3">
+                    <i class="fas fa-graduation-cap me-3"></i>
+                    Market Education
+                </h1>
+                <p class="lead mb-0">Understanding the Major Stock Market Indices</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Introduction with Image -->
+    <div class="row mb-5 align-items-center">
+        <div class="col-md-8">
+            <div class="intro-card">
+                <p class="mb-0">
+                    Stock market indices are benchmarks that track the performance of a specific group of stocks.
+                    They provide investors with a snapshot of market trends and overall economic health.
+                    The three most important U.S. stock market indices are the S&P 500, NASDAQ Composite, and Dow Jones Industrial Average.
+                </p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <img src="https://www.commlabindia.com/hubfs/blogs/Empowering-Your-Wallet-Embrace-eLearning-for-Financial-Education%5BInfographic.jpg"
+                 alt="Financial Education"
+                 class="img-fluid rounded shadow"
+                 onerror="this.style.display='none'">
+        </div>
+    </div>
+
+    <!-- Index Cards -->
+    <div class="row">
+        <!-- S&P 500 -->
+        <div class="col-md-4 mb-4">
+            <div class="index-card sp500-card">
+                <div class="card-header-custom">
+                    <h3 class="mb-1">S&P 500</h3>
+                    <p class="subtitle mb-0">Standard & Poor's 500</p>
+                </div>
+                <div class="card-body-custom">
+                    <div class="stat-box mb-3">
+                        <i class="fas fa-building fa-2x mb-2"></i>
+                        <h4>500 Companies</h4>
+                        <p class="text-muted">Large-cap stocks</p>
+                    </div>
+
+                    <h5 class="section-title">What is it?</h5>
+                    <p>The S&P 500 is a stock market index that tracks the performance of 500 of the largest publicly traded companies in the United States.</p>
+
+                    <h5 class="section-title">Key Characteristics</h5>
+                    <ul class="custom-list">
+                        <li>Represents about 80% of the total U.S. stock market value</li>
+                        <li>Weighted by market capitalization (larger companies have more influence)</li>
+                        <li>Widely considered the best gauge of the U.S. stock market</li>
+                        <li>Includes companies from all sectors</li>
+                    </ul>
+
+                    <h5 class="section-title">Examples</h5>
+                    <p class="mb-0">Apple, Microsoft, Amazon, Tesla, Alphabet (Google), Meta (Facebook)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- NASDAQ -->
+        <div class="col-md-4 mb-4">
+            <div class="index-card nasdaq-card">
+                <div class="card-header-custom">
+                    <h3 class="mb-1">NASDAQ</h3>
+                    <p class="subtitle mb-0">NASDAQ Composite</p>
+                </div>
+                <div class="card-body-custom">
+                    <div class="stat-box mb-3">
+                        <i class="fas fa-microchip fa-2x mb-2"></i>
+                        <h4>3,000+ Companies</h4>
+                        <p class="text-muted">Tech-focused</p>
+                    </div>
+
+                    <h5 class="section-title">What is it?</h5>
+                    <p>The NASDAQ Composite is a stock market index that includes over 3,000 stocks listed on the NASDAQ stock exchange.</p>
+
+                    <h5 class="section-title">Key Characteristics</h5>
+                    <ul class="custom-list">
+                        <li>Heavily weighted toward technology companies</li>
+                        <li>Includes growth-oriented and innovative companies</li>
+                        <li>Market-cap weighted index</li>
+                        <li>More volatile than S&P 500 due to tech concentration</li>
+                    </ul>
+
+                    <h5 class="section-title">Examples</h5>
+                    <p class="mb-0">Apple, Microsoft, NVIDIA, Tesla, Amazon, Meta, Alphabet</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- DOW -->
+        <div class="col-md-4 mb-4">
+            <div class="index-card dow-card">
+                <div class="card-header-custom">
+                    <h3 class="mb-1">DOW</h3>
+                    <p class="subtitle mb-0">Dow Jones Industrial Average</p>
+                </div>
+                <div class="card-body-custom">
+                    <div class="stat-box mb-3">
+                        <i class="fas fa-industry fa-2x mb-2"></i>
+                        <h4>30 Companies</h4>
+                        <p class="text-muted">Blue-chip stocks</p>
+                    </div>
+
+                    <h5 class="section-title">What is it?</h5>
+                    <p>The Dow Jones Industrial Average is the oldest stock market index, tracking 30 large, well-established companies.</p>
+
+                    <h5 class="section-title">Key Characteristics</h5>
+                    <ul class="custom-list">
+                        <li>Price-weighted (higher stock prices have more influence)</li>
+                        <li>Focuses on blue-chip, established companies</li>
+                        <li>Most widely recognized stock market index globally</li>
+                        <li>Created in 1896 by Charles Dow</li>
+                    </ul>
+
+                    <h5 class="section-title">Examples</h5>
+                    <p class="mb-0">Apple, Microsoft, Boeing, McDonald's, Coca-Cola, Nike</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="comparison-card">
+                <h3 class="mb-4 text-center">Quick Comparison</h3>
+                <div class="table-responsive">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Index</th>
+                                <th>Number of Stocks</th>
+                                <th>Weighting Method</th>
+                                <th>Focus</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>S&P 500</strong></td>
+                                <td>500</td>
+                                <td>Market Cap</td>
+                                <td>Broad market representation</td>
+                            </tr>
+                            <tr>
+                                <td><strong>NASDAQ</strong></td>
+                                <td>3,000+</td>
+                                <td>Market Cap</td>
+                                <td>Technology & growth stocks</td>
+                            </tr>
+                            <tr>
+                                <td><strong>DOW</strong></td>
+                                <td>30</td>
+                                <td>Price-weighted</td>
+                                <td>Blue-chip companies</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Why This Matters -->
+    <div class="row mt-4 mb-5">
+        <div class="col-md-12">
+            <div class="info-card">
+                <div class="d-flex align-items-start">
+                    <i class="fas fa-lightbulb fa-2x text-warning me-3 mt-1"></i>
+                    <div>
+                        <h5 class="mb-2">Why Do These Indices Matter?</h5>
+                        <p class="mb-0">
+                            These indices serve as benchmarks for the overall health of the U.S. economy and stock market.
+                            Investors use them to compare their portfolio performance, gauge market sentiment, and make informed investment decisions.
+                            Many mutual funds and ETFs are designed to track these indices, making them accessible investment options for everyday investors.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.education-hero {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    padding: 3rem 2rem;
+    border-radius: 15px;
+    color: white;
+    box-shadow: 0 10px 30px rgba(30, 60, 114, 0.3);
+}
+
+.education-hero h1 {
+    color: white;
+    font-weight: 700;
+}
+
+.education-hero .lead {
+    color: white;
+    font-size: 1.2rem;
+}
+
+.intro-card {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border-left: 5px solid #2a5298;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+.index-card {
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    height: 100%;
+    overflow: hidden;
+}
+
+.sp500-card {
+    background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+}
+
+.nasdaq-card {
+    background: linear-gradient(135deg, #134e5e 0%, #71b280 100%);
+}
+
+.dow-card {
+    background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+}
+
+.index-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.card-header-custom {
+    padding: 1.5rem;
+    color: white;
+    text-align: center;
+    background: transparent;
+}
+
+.card-header-custom h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    color: white !important;
+}
+
+.subtitle {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    color: white !important;
+}
+
+.card-body-custom {
+    padding: 1.5rem;
+    color: white;
+}
+
+.card-body-custom p {
+    color: white;
+}
+
+.card-body-custom h5 {
+    color: white;
+}
+
+.stat-box {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    backdrop-filter: blur(10px);
+}
+
+.stat-box i {
+    color: white;
+    opacity: 0.9;
+}
+
+.stat-box h4 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    color: white;
+}
+
+.stat-box p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: white;
+    opacity: 0.85;
+}
+
+.section-title {
+    color: white;
+    font-weight: 600;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    opacity: 0.95;
+}
+
+.custom-list {
+    padding-left: 1.25rem;
+    margin-bottom: 1rem;
+    color: white;
+}
+
+.custom-list li {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+    color: white;
+}
+
+.comparison-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.comparison-table thead {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+}
+
+.comparison-table th,
+.comparison-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.comparison-table th {
+    font-weight: 600;
+}
+
+.comparison-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.info-card {
+    background: linear-gradient(135deg, #fff5e6 0%, #ffe6cc 100%);
+    border-radius: 12px;
+    padding: 2rem;
+    border-left: 5px solid #ffc107;
+}
+</style>
+{% endblock %}

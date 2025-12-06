@@ -186,3 +186,19 @@ def get_news():
 @app.route('/about')
 def about():
     return render_template('about.html')
+
+@app.route('/trending')
+def trending():
+    """
+    Trending Stocks page - Top 10 stocks by 24hr trading volume
+    Uses a curated list of popular stocks to avoid excessive API calls
+    """
+    return render_template('trending.html')
+
+@app.route('/education')
+def education():
+    """
+    Market Education page - Learn about major market indices
+    Static page explaining S&P 500, NASDAQ, and DOW
+    """
+    return render_template('education.html')

@@ -46,6 +46,16 @@
                             Markets
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'trending' }}" href="{{ url_for('trending') }}">
+                            Trending
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if request.endpoint == 'education' }}" href="{{ url_for('education') }}">
+                            Education
+                        </a>
+                    </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     {% if current_user.is_authenticated %}
