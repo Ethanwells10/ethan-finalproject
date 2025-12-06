@@ -14,6 +14,25 @@ from datetime import datetime, timedelta
 tickers = Blueprint('tickers', __name__)
 
 
+def normalize_capitalization(text):
+    """
+    Normalize sector/industry capitalization for consistency.
+    Converts to Title Case, except for known acronyms.
+    """
+    if not text or text == 'N/A':
+        return text
+
+    # List of acronyms that should stay uppercase
+    acronyms = ['ETF', 'IT', 'AI', 'CEO', 'CFO', 'IPO', 'REIT']
+
+    # If it's a known acronym, keep it as-is
+    if text.upper() in acronyms:
+        return text.upper()
+
+    # Convert to title case for everything else
+    return text.title()
+
+
 @tickers.route('/')
 def index():
     """Main ticker search page"""
@@ -47,17 +66,21 @@ def view_ticker(symbol):
         ticker_db = execute_query(ticker_query, (symbol,), fetch=True)
 
         if not ticker_db and profile:
-            # Insert new ticker
+            # Insert new ticker with normalized capitalization
             insert_query = """
                 INSERT INTO tickers (symbol, name, exchange, sector, industry)
                 VALUES (%s, %s, %s, %s, %s)
             """
+            # Normalize sector and industry for consistent capitalization
+            sector = normalize_capitalization(profile.get('sector', 'N/A'))
+            industry = normalize_capitalization(profile.get('industry', 'N/A'))
+
             execute_query(insert_query, (
                 symbol,
                 profile.get('name', symbol),
                 profile.get('exchange', 'N/A'),
-                profile.get('sector', 'N/A'),
-                profile.get('industry', 'N/A')
+                sector,
+                industry
             ), fetch=False)
 
         # Get news for this ticker (2-3 relevant headlines)

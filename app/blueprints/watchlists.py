@@ -16,6 +16,25 @@ import yfinance as yf
 watchlists = Blueprint('watchlists', __name__)
 
 
+def normalize_capitalization(text):
+    """
+    Normalize sector/industry capitalization for consistency.
+    Converts to Title Case, except for known acronyms.
+    """
+    if not text or text == 'N/A':
+        return text
+
+    # List of acronyms that should stay uppercase
+    acronyms = ['ETF', 'IT', 'AI', 'CEO', 'CFO', 'IPO', 'REIT']
+
+    # If it's a known acronym, keep it as-is
+    if text.upper() in acronyms:
+        return text.upper()
+
+    # Convert to title case for everything else
+    return text.title()
+
+
 @watchlists.route('/')
 @login_required
 def index():
@@ -269,6 +288,10 @@ def add_ticker(watchlist_id):
                     return redirect(url_for('watchlists.view_watchlist', watchlist_id=watchlist_id))
 
             # Insert new ticker with metadata (stored once, not refreshed)
+            # Normalize sector and industry for consistent capitalization
+            sector = normalize_capitalization(profile.get('sector', 'N/A'))
+            industry = normalize_capitalization(profile.get('industry', 'N/A'))
+
             # Try with industry column first, fall back if column doesn't exist
             try:
                 insert_ticker = """
@@ -279,8 +302,8 @@ def add_ticker(watchlist_id):
                     symbol,
                     profile.get('name', symbol),
                     profile.get('exchange', 'N/A'),
-                    profile.get('sector', 'N/A'),
-                    profile.get('industry', 'N/A')
+                    sector,
+                    industry
                 ), fetch=False)
             except:
                 # Fallback if industry column doesn't exist
