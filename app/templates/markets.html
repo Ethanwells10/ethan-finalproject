@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>Market Overview</h1>
+        <p class="subtitle">Real-time market data and financial news</p>
+    </div>
+
+    <!-- Major Indices -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <h5>Major Indices</h5>
+                <small id="indices-timestamp" class="text-muted">Loading...</small>
+            </div>
+            <button class="btn btn-sm btn-outline-primary" onclick="loadMarketData()" id="refreshBtn">
+                <i class="fas fa-sync-alt me-1"></i>Refresh
+            </button>
+        </div>
+        <div class="card-body">
+            <div id="indices-loading" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">Loading market data...</p>
+            </div>
+            <div id="indices-container" class="row" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- Market Metrics Grid -->
+    <div class="grid-2-cols">
+        <!-- Crypto Prices -->
+        <div class="card">
+            <div class="card-header">
+                <h5>Cryptocurrency Prices</h5>
+                <small class="text-muted">Live prices from CoinGecko</small>
+            </div>
+            <div class="card-body">
+                <div id="crypto-loading" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status"></div>
+                </div>
+                <div id="crypto-container" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Market Sentiment -->
+        <div class="card">
+            <div class="card-header">
+                <h5>Market Snapshot</h5>
+                <small class="text-muted">Key market indicators</small>
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-chart-line me-2 text-primary"></i>S&P 500 ETF (SPY)</span>
+                        <span id="spy-summary" class="badge bg-secondary">Loading...</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-chart-area me-2 text-info"></i>NASDAQ 100 ETF (QQQ)</span>
+                        <span id="qqq-summary" class="badge bg-secondary">Loading...</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-chart-bar me-2 text-success"></i>Dow Jones ETF (DIA)</span>
+                        <span id="dia-summary" class="badge bg-secondary">Loading...</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <span><i class="fab fa-bitcoin me-2 text-warning"></i>Bitcoin</span>
+                        <span id="btc-summary" class="badge bg-secondary">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Business Headlines -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <h5>Business & Financial News</h5>
+                <small class="text-muted">Latest headlines from top business sources</small>
+            </div>
+            <button class="btn btn-sm btn-outline-primary" onclick="searchNews()">
+                <i class="fas fa-sync-alt me-1"></i>Refresh
+            </button>
+        </div>
+        <div class="card-body">
+            <!-- News Results -->
+            <div id="news-search-loading" class="text-center py-4">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">Loading news...</p>
+            </div>
+            <div id="news-results" style="max-height: 600px; overflow-y: auto; display: none;"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Load market data on page load
+$(document).ready(function() {
+    loadMarketData();
+    searchNews();
+});
+
+// Load market data from dashboard API
+function loadMarketData() {
+    const refreshBtn = $('#refreshBtn');
+    refreshBtn.prop('disabled', true);
+
+    $('#indices-loading').show();
+    $('#indices-container').hide();
+    $('#crypto-loading').show();
+    $('#crypto-container').hide();
+
+    $.ajax({
+        url: '/api/market-overview',
+        method: 'GET',
+        success: function(data) {
+            // Render major indices
+            if (data.indices && data.indices.length > 0) {
+                let indicesHtml = '';
+                data.indices.forEach(function(index) {
+                    let changeClass = index.change >= 0 ? 'text-success' : 'text-danger';
+                    let arrow = index.change >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+
+                    indicesHtml += `
+                        <div class="col-md-4 mb-3">
+                            <div class="card border-0 shadow-sm">
+                                <div class="card-body text-center">
+                                    <h6 class="text-muted mb-1">${index.symbol}</h6>
+                                    <small class="text-muted d-block mb-2">${index.name}</small>
+                                    <h4 class="mb-2">$${index.price.toFixed(2)}</h4>
+                                    <span class="${changeClass}">
+                                        <i class="fas ${arrow}"></i>
+                                        ${index.change.toFixed(2)} (${index.change_percent.toFixed(2)}%)
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    // Update summary badges
+                    if (index.symbol === 'SPY') {
+                        $('#spy-summary').removeClass('bg-secondary').addClass(changeClass.includes('success') ? 'bg-success' : 'bg-danger')
+                            .text(`$${index.price.toFixed(2)} (${index.change_percent > 0 ? '+' : ''}${index.change_percent.toFixed(2)}%)`);
+                    } else if (index.symbol === 'QQQ') {
+                        $('#qqq-summary').removeClass('bg-secondary').addClass(changeClass.includes('success') ? 'bg-success' : 'bg-danger')
+                            .text(`$${index.price.toFixed(2)} (${index.change_percent > 0 ? '+' : ''}${index.change_percent.toFixed(2)}%)`);
+                    } else if (index.symbol === 'DIA') {
+                        $('#dia-summary').removeClass('bg-secondary').addClass(changeClass.includes('success') ? 'bg-success' : 'bg-danger')
+                            .text(`$${index.price.toFixed(2)} (${index.change_percent > 0 ? '+' : ''}${index.change_percent.toFixed(2)}%)`);
+                    }
+                });
+
+                $('#indices-container').html(indicesHtml).show();
+                $('#indices-loading').hide();
+
+                // Update timestamp
+                const timestamp = new Date();
+                $('#indices-timestamp').text(`Updated ${timestamp.toLocaleTimeString()}`);
+            }
+
+            // Render crypto
+            if (data.crypto && data.crypto.length > 0) {
+                let cryptoHtml = '<div class="list-group">';
+                data.crypto.forEach(function(coin) {
+                    let changeClass = coin.change_percent >= 0 ? 'text-success' : 'text-danger';
+                    let arrow = coin.change_percent >= 0 ? 'fa-arrow-up' : 'fa-arrow-down';
+
+                    cryptoHtml += `
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>${coin.name}</strong>
+                                </div>
+                                <div class="text-end">
+                                    <div>$${coin.price.toLocaleString()}</div>
+                                    <small class="${changeClass}">
+                                        <i class="fas ${arrow}"></i>
+                                        ${coin.change_percent.toFixed(2)}%
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    // Update BTC summary
+                    if (coin.name === 'Bitcoin') {
+                        $('#btc-summary').removeClass('bg-secondary').addClass(changeClass.includes('success') ? 'bg-success' : 'bg-danger')
+                            .text(`$${coin.price.toLocaleString()} (${coin.change_percent > 0 ? '+' : ''}${coin.change_percent.toFixed(2)}%)`);
+                    }
+                });
+                cryptoHtml += '</div>';
+                $('#crypto-container').html(cryptoHtml).show();
+                $('#crypto-loading').hide();
+            }
+
+            refreshBtn.prop('disabled', false);
+        },
+        error: function(error) {
+            console.error('Market data error:', error);
+            $('#indices-loading').html('<div class="alert alert-danger">Error loading market data</div>');
+            $('#crypto-loading').html('<div class="alert alert-danger">Error loading crypto data</div>');
+            refreshBtn.prop('disabled', false);
+        }
+    });
+}
+
+// Load business news headlines
+function searchNews() {
+    $('#news-search-loading').show();
+    $('#news-results').hide();
+
+    $.ajax({
+        url: '/api/news',
+        method: 'GET',
+        success: function(data) {
+            if (data.articles && data.articles.length > 0) {
+                let newsHtml = '';
+                data.articles.forEach(function(article, index) {
+                    if (index < 15) {  // Limit to 15 articles
+                        let date = new Date(article.publishedAt);
+                        let timeAgo = timeSince(date);
+
+                        newsHtml += `
+                            <div class="mb-3 pb-3 border-bottom">
+                                <a href="${article.url}" target="_blank" class="text-decoration-none">
+                                    <h6 class="text-primary mb-1">${article.title}</h6>
+                                </a>
+                                ${article.description ? `<p class="small text-muted mb-1">${article.description}</p>` : ''}
+                                <small class="text-muted">
+                                    <i class="far fa-clock me-1"></i>${timeAgo} ago
+                                    <span class="mx-2">|</span>
+                                    ${article.source.name}
+                                </small>
+                            </div>
+                        `;
+                    }
+                });
+                $('#news-results').html(newsHtml).show();
+            } else {
+                $('#news-results').html('<div class="alert alert-info">No business news available</div>').show();
+            }
+            $('#news-search-loading').hide();
+        },
+        error: function(error) {
+            $('#news-search-loading').hide();
+            $('#news-results').html('<div class="alert alert-danger">Error loading news</div>').show();
+            console.error('News error:', error);
+        }
+    });
+}
+
+// Helper function to calculate time ago
+function timeSince(date) {
+    const seconds = Math.floor((new Date() - date) / 1000);
+    let interval = seconds / 31536000;
+    if (interval > 1) return Math.floor(interval) + " years";
+    interval = seconds / 2592000;
+    if (interval > 1) return Math.floor(interval) + " months";
+    interval = seconds / 86400;
+    if (interval > 1) return Math.floor(interval) + " days";
+    interval = seconds / 3600;
+    if (interval > 1) return Math.floor(interval) + " hours";
+    interval = seconds / 60;
+    if (interval > 1) return Math.floor(interval) + " minutes";
+    return Math.floor(seconds) + " seconds";
+}
+</script>
+{% endblock %}

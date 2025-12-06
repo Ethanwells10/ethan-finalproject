@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Page Header -->
+            <div class="page-header text-center">
+                <h1>Stock Charts</h1>
+                <p class="subtitle">Search for any stock to view interactive price charts</p>
+            </div>
+
+            <!-- Search Form -->
+            <div class="card">
+                <div class="card-body">
+                    <form action="{{ url_for('tickers.search') }}" method="GET">
+                        <div class="row">
+                            <div class="col-md-9">
+                                <input type="text"
+                                       name="symbol"
+                                       class="form-control form-control-lg"
+                                       placeholder="Enter ticker symbol (e.g., AAPL, TSLA, MSFT)"
+                                       required
+                                       autofocus
+                                       style="text-transform: uppercase;">
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-primary btn-lg w-100">
+                                    <i class="fas fa-search me-2"></i>Search
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Popular Tickers -->
+            <div class="card">
+                <div class="card-header">
+                    <h5>Popular Tickers</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2">
+                    {% for ticker in ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NVDA', 'JPM', 'V', 'WMT', 'SPY', 'QQQ'] %}
+                    <a href="{{ url_for('tickers.view_ticker', symbol=ticker) }}"
+                       class="btn btn-outline-primary">
+                        {{ ticker }}
+                    </a>
+                    {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="row">
+                <div class="col-md-4 text-center mb-4">
+                    <div class="card h-100 border-0">
+                        <div class="card-body">
+                            <i class="fas fa-chart-area fa-3x text-primary mb-3"></i>
+                            <h5>Interactive Charts</h5>
+                            <p class="text-muted small">6-month historical price data with Chart.js</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center mb-4">
+                    <div class="card h-100 border-0">
+                        <div class="card-body">
+                            <i class="fas fa-info-circle fa-3x text-success mb-3"></i>
+                            <h5>Live Data</h5>
+                            <p class="text-muted small">Real-time price, volume, and market data</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center mb-4">
+                    <div class="card h-100 border-0">
+                        <div class="card-body">
+                            <i class="fas fa-sticky-note fa-3x text-warning mb-3"></i>
+                            <h5>Personal Notes</h5>
+                            <p class="text-muted small">Add notes and analysis for each ticker</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Auto-uppercase input
+document.querySelector('input[name="symbol"]').addEventListener('input', function(e) {
+    this.value = this.value.toUpperCase();
+});
+</script>
+{% endblock %}

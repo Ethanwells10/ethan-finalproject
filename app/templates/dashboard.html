@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Welcome Header -->
+    <div class="mb-5">
+        <h1 class="mb-2">Welcome{% if current_user.is_authenticated %}, {{ current_user.email.split('@')[0] }}{% endif %}</h1>
+        <p class="text-muted">Your market monitoring dashboard</p>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-4">
+            <a href="{{ url_for('watchlists.index') }}" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm hover-lift">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-star fa-3x text-warning"></i>
+                        </div>
+                        <h5 class="mb-2">My Watchlists</h5>
+                        <p class="text-muted small mb-0">Track your favorite stocks</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{{ url_for('tickers.index') }}" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm hover-lift">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-chart-line fa-3x text-primary"></i>
+                        </div>
+                        <h5 class="mb-2">Stock Charts</h5>
+                        <p class="text-muted small mb-0">Analyze price movements</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{{ url_for('markets.index') }}" class="text-decoration-none">
+                <div class="card h-100 border-0 shadow-sm hover-lift">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-globe fa-3x text-success"></i>
+                        </div>
+                        <h5 class="mb-2">Market Overview</h5>
+                        <p class="text-muted small mb-0">View market indices & news</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Search -->
+    <div class="row mb-5">
+        <div class="col-md-8 offset-md-2">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h5 class="mb-3"><i class="fas fa-search me-2"></i>Quick Ticker Search</h5>
+                    <form action="{{ url_for('tickers.search') }}" method="GET" class="d-flex gap-2">
+                        <input type="text"
+                               name="symbol"
+                               class="form-control form-control-lg"
+                               placeholder="Enter ticker symbol (e.g., AAPL, TSLA, MSFT)"
+                               required
+                               style="text-transform: uppercase;">
+                        <button type="submit" class="btn btn-primary btn-lg px-4">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- User Watchlists Summary -->
+        {% if current_user.is_authenticated %}
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center py-3">
+                    <h5 class="mb-0"><i class="fas fa-list me-2"></i>Your Watchlists</h5>
+                    <a href="{{ url_for('watchlists.index') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    <div id="watchlist-loading" class="text-center py-4">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                        <p class="small text-muted mt-2">Loading your watchlists...</p>
+                    </div>
+                    <div id="watchlist-summary" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-lg-8 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center p-5">
+                    <i class="fas fa-user-circle fa-4x text-muted mb-3"></i>
+                    <h5 class="mb-3">Sign in to access more features</h5>
+                    <p class="text-muted mb-4">Create watchlists, add notes, and personalize your experience</p>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-primary me-2">Sign In</a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary">Create Account</a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Market Status at a Glance -->
+        <div class="col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Market Status</h5>
+                </div>
+                <div class="card-body">
+                    <div id="market-status-loading" class="text-center py-4">
+                        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+                    </div>
+                    <div id="market-status" style="display: none;">
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                            <span class="text-muted small">S&P 500</span>
+                            <span id="spy-badge" class="badge bg-secondary">--</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                            <span class="text-muted small">NASDAQ</span>
+                            <span id="qqq-badge" class="badge bg-secondary">--</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                            <span class="text-muted small">Dow Jones</span>
+                            <span id="dia-badge" class="badge bg-secondary">--</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-muted small">Bitcoin</span>
+                            <span id="btc-badge" class="badge bg-secondary">--</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-white border-0 text-center">
+                    <a href="{{ url_for('markets.index') }}" class="small text-decoration-none">
+                        View detailed market data <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popular Tickers Quick Links -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0 py-3">
+            <h5 class="mb-0"><i class="fas fa-fire me-2"></i>Popular Tickers</h5>
+        </div>
+        <div class="card-body">
+            <div class="d-flex flex-wrap gap-2">
+                {% for symbol in ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'META', 'NVDA', 'JPM', 'V', 'WMT'] %}
+                <a href="{{ url_for('tickers.view_ticker', symbol=symbol) }}" class="btn btn-outline-primary btn-sm">
+                    {{ symbol }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Load market status
+    loadMarketStatus();
+
+    {% if current_user.is_authenticated %}
+    // Load user watchlists summary
+    loadWatchlistSummary();
+    {% endif %}
+
+    // Auto-uppercase ticker input
+    $('input[name="symbol"]').on('input', function() {
+        this.value = this.value.toUpperCase();
+    });
+});
+
+function loadMarketStatus() {
+    $.ajax({
+        url: '/api/market-overview',
+        method: 'GET',
+        success: function(data) {
+            // Update market status badges
+            if (data.indices && data.indices.length > 0) {
+                data.indices.forEach(function(index) {
+                    let badgeClass = index.change >= 0 ? 'bg-success' : 'bg-danger';
+                    let arrow = index.change >= 0 ? '↑' : '↓';
+                    let text = `${arrow} ${Math.abs(index.change_percent).toFixed(2)}%`;
+
+                    if (index.symbol === 'SPY') {
+                        $('#spy-badge').removeClass('bg-secondary').addClass(badgeClass).text(text);
+                    } else if (index.symbol === 'QQQ') {
+                        $('#qqq-badge').removeClass('bg-secondary').addClass(badgeClass).text(text);
+                    } else if (index.symbol === 'DIA') {
+                        $('#dia-badge').removeClass('bg-secondary').addClass(badgeClass).text(text);
+                    }
+                });
+            }
+
+            // Update Bitcoin badge
+            if (data.crypto && data.crypto.length > 0) {
+                data.crypto.forEach(function(coin) {
+                    if (coin.name === 'Bitcoin') {
+                        let badgeClass = coin.change_percent >= 0 ? 'bg-success' : 'bg-danger';
+                        let arrow = coin.change_percent >= 0 ? '↑' : '↓';
+                        $('#btc-badge').removeClass('bg-secondary').addClass(badgeClass)
+                            .text(`${arrow} ${Math.abs(coin.change_percent).toFixed(2)}%`);
+                    }
+                });
+            }
+
+            $('#market-status-loading').hide();
+            $('#market-status').show();
+        },
+        error: function() {
+            $('#market-status-loading').html('<p class="small text-muted">Unable to load</p>');
+        }
+    });
+}
+
+{% if current_user.is_authenticated %}
+function loadWatchlistSummary() {
+    $.ajax({
+        url: '/markets/api/watchlist-summary',
+        method: 'GET',
+        success: function(data) {
+            if (data.watchlists && data.watchlists.length > 0) {
+                let html = '<div class="list-group list-group-flush">';
+
+                data.watchlists.slice(0, 5).forEach(function(wl) {
+                    html += `
+                        <a href="/watchlists/${wl.id}" class="list-group-item list-group-item-action">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">${wl.name}</h6>
+                                    <small class="text-muted">${wl.ticker_count} ticker${wl.ticker_count !== 1 ? 's' : ''}</small>
+                                </div>
+                                <i class="fas fa-chevron-right text-muted"></i>
+                            </div>
+                        </a>
+                    `;
+                });
+
+                html += '</div>';
+
+                if (data.watchlists.length > 5) {
+                    html += `<p class="text-center text-muted small mt-3 mb-0">And ${data.watchlists.length - 5} more...</p>`;
+                }
+
+                $('#watchlist-summary').html(html).show();
+            } else {
+                $('#watchlist-summary').html(`
+                    <div class="text-center py-4">
+                        <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+                        <p class="text-muted mb-3">You haven't created any watchlists yet</p>
+                        <a href="/watchlists/" class="btn btn-primary">Create Your First Watchlist</a>
+                    </div>
+                `).show();
+            }
+
+            $('#watchlist-loading').hide();
+        },
+        error: function() {
+            $('#watchlist-loading').html('<p class="small text-muted text-center">Unable to load watchlists</p>');
+        }
+    });
+}
+{% endif %}
+</script>
+{% endblock %}

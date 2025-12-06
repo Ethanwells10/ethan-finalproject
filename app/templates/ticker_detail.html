@@ -1,0 +1,371 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="mb-4">
+        <a href="{{ url_for('tickers.index') }}" class="text-decoration-none text-muted">
+            <i class="fas fa-arrow-left me-2"></i>Back to Search
+        </a>
+        <h1 class="mt-3 mb-1">
+            <strong class="text-primary">{{ ticker.symbol }}</strong>
+            <span class="text-muted fs-4">{{ ticker.name }}</span>
+        </h1>
+        <p class="text-muted mb-0">{{ ticker.exchange }} • {{ ticker.sector }}</p>
+    </div>
+
+    <!-- Key Metrics - Clean, Simple Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-6">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="text-muted small mb-2">Price</div>
+                    <h3 class="mb-0">
+                        {% if ticker.current_price %}
+                            ${{ "%.2f"|format(ticker.current_price) }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </h3>
+                    {% if ticker.change_percent %}
+                        {% if ticker.change_percent > 0 %}
+                            <small class="text-success">
+                                <i class="fas fa-arrow-up"></i> {{ "%.2f"|format(ticker.change_percent) }}%
+                            </small>
+                        {% elif ticker.change_percent < 0 %}
+                            <small class="text-danger">
+                                <i class="fas fa-arrow-down"></i> {{ "%.2f"|format(ticker.change_percent|abs) }}%
+                            </small>
+                        {% else %}
+                            <small class="text-muted">0.00%</small>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="text-muted small mb-2">Previous Close</div>
+                    <h3 class="mb-0">
+                        {% if ticker.previous_close %}
+                            ${{ "%.2f"|format(ticker.previous_close) }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="text-muted small mb-2">Volume</div>
+                    <h3 class="mb-0">
+                        {% if ticker.volume %}
+                            {{ "{:,}".format(ticker.volume) }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="text-muted small mb-2">Market Cap</div>
+                    <h3 class="mb-0">
+                        {% if ticker.market_cap %}
+                            {% if ticker.market_cap >= 1000000000000 %}
+                                ${{ "%.2f"|format(ticker.market_cap / 1000000000000) }}T
+                            {% elif ticker.market_cap >= 1000000000 %}
+                                ${{ "%.2f"|format(ticker.market_cap / 1000000000) }}B
+                            {% else %}
+                                ${{ "%.2f"|format(ticker.market_cap / 1000000) }}M
+                            {% endif %}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Section -->
+    <div class="card mb-4">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Price Chart</h5>
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-outline-primary active" onclick="updateChart('1mo', this)">1M</button>
+                <button type="button" class="btn btn-outline-primary" onclick="updateChart('3mo', this)">3M</button>
+                <button type="button" class="btn btn-outline-primary" onclick="updateChart('6mo', this)">6M</button>
+                <button type="button" class="btn btn-outline-primary" onclick="updateChart('1y', this)">1Y</button>
+                <button type="button" class="btn btn-outline-primary" onclick="updateChart('5y', this)">5Y</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div id="chart-loading" style="display: none;" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted small">Loading chart data...</p>
+            </div>
+            <canvas id="priceChart" height="70"></canvas>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- News Section -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-newspaper me-2"></i>Latest News</h5>
+                </div>
+                <div class="card-body">
+                    {% if news %}
+                        <div class="list-group list-group-flush">
+                            {% for article in news %}
+                            <a href="{{ article.url }}" target="_blank" rel="noopener noreferrer" class="list-group-item list-group-item-action border-0 px-0">
+                                <div class="d-flex w-100 justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">{{ article.title }}</h6>
+                                        {% if article.description %}
+                                        <p class="mb-1 text-muted small">{{ article.description[:150] }}{% if article.description|length > 150 %}...{% endif %}</p>
+                                        {% endif %}
+                                        <small class="text-muted">
+                                            {{ article.source }}
+                                            {% if article.published_at %}
+                                                • {{ article.published_at.strftime('%b %d, %Y') }}
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                    {% if article.image_url %}
+                                    <img src="{{ article.image_url }}" alt="News thumbnail" class="ms-3 rounded" style="width: 80px; height: 80px; object-fit: cover;">
+                                    {% endif %}
+                                </div>
+                            </a>
+                            {% if not loop.last %}<hr class="my-2">{% endif %}
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-info-circle me-2"></i>No recent news available for {{ ticker.symbol }}.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes Section -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-sticky-note me-2"></i>My Notes</h5>
+                    {% if current_user.is_authenticated %}
+                    <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#addNoteModal">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    {% endif %}
+                </div>
+                <div class="card-body" style="max-height: 600px; overflow-y: auto;">
+                    {% if current_user.is_authenticated %}
+                        {% if notes %}
+                            {% for note in notes %}
+                            <div class="card mb-2 bg-light border-0">
+                                <div class="card-body p-3">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <small class="text-muted">
+                                            {{ note.created_at.strftime('%b %d, %Y') }}
+                                        </small>
+                                        <div>
+                                            <button class="btn btn-sm btn-link p-0 me-2"
+                                                    onclick="editNote({{ note.id }}, `{{ note.note_text|replace('`', '\\`')|replace('\n', '\\n') }}`)">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-link p-0 text-danger"
+                                                    onclick="deleteNote({{ note.id }})">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p class="mb-0 small" style="white-space: pre-wrap;">{{ note.note_text }}</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="alert alert-info small mb-0">
+                                <i class="fas fa-info-circle me-2"></i>No notes yet. Click + to add one.
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-info small mb-0">
+                            <i class="fas fa-info-circle me-2"></i>Login to add notes.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Note Modal -->
+<div class="modal fade" id="addNoteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Note</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('tickers.add_note', symbol=ticker.symbol) }}">
+                <div class="modal-body">
+                    <textarea class="form-control" name="note_text" rows="5" placeholder="Your analysis or thoughts..." required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Save Note</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Note Modal -->
+<div class="modal fade" id="editNoteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Note</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" id="editNoteForm">
+                <div class="modal-body">
+                    <textarea class="form-control" id="editNoteText" name="note_text" rows="5" required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Note</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Note Form (hidden) -->
+<form id="deleteNoteForm" method="POST" style="display: none;"></form>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+let priceChart;
+const tickerSymbol = '{{ ticker.symbol }}';
+
+// Initialize chart
+$(document).ready(function() {
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    const chartData = {{ chart_data|tojson }};
+
+    priceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartData.dates,
+            datasets: [{
+                label: tickerSymbol,
+                data: chartData.prices,
+                borderColor: 'rgb(37, 99, 235)',
+                backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.2,
+                pointRadius: 0,
+                pointHoverRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        label: function(context) {
+                            return '$' + context.parsed.y.toFixed(2);
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toFixed(2);
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        maxTicksLimit: 8
+                    },
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+});
+
+// Update chart dynamically
+function updateChart(period, button) {
+    $('.btn-group button').removeClass('active');
+    $(button).addClass('active');
+
+    $('#chart-loading').show();
+    $('#priceChart').hide();
+
+    $.ajax({
+        url: `/tickers/api/chart/${tickerSymbol}?period=${period}`,
+        method: 'GET',
+        success: function(data) {
+            priceChart.data.labels = data.labels;
+            priceChart.data.datasets[0].data = data.prices;
+            priceChart.update();
+
+            $('#chart-loading').hide();
+            $('#priceChart').show();
+        },
+        error: function(error) {
+            console.error('Error updating chart:', error);
+            alert('Error loading chart data.');
+            $('#chart-loading').hide();
+            $('#priceChart').show();
+        }
+    });
+}
+
+// Note functions
+function editNote(noteId, noteText) {
+    document.getElementById('editNoteText').value = noteText;
+    document.getElementById('editNoteForm').action = `/tickers/edit_note/${noteId}`;
+    new bootstrap.Modal(document.getElementById('editNoteModal')).show();
+}
+
+function deleteNote(noteId) {
+    if (confirm('Delete this note?')) {
+        const form = document.getElementById('deleteNoteForm');
+        form.action = `/tickers/delete_note/${noteId}`;
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

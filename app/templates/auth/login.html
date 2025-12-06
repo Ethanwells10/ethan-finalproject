@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow-lg">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-user-circle fa-4x text-primary mb-3"></i>
+                        <h2>Login to Market Monitor</h2>
+                        <p class="text-muted">Track stocks, manage watchlists, and stay informed</p>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('auth.login') }}">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">
+                                <i class="fas fa-envelope me-1"></i>Email
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="email"
+                                   name="email"
+                                   value="EthanWells10"
+                                   placeholder="your@email.com"
+                                   required
+                                   autofocus>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-lock me-1"></i>Password
+                            </label>
+                            <input type="password"
+                                   class="form-control"
+                                   id="password"
+                                   name="password"
+                                   value="GenerativeAI"
+                                   placeholder="Enter your password"
+                                   required>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox"
+                                   class="form-check-input"
+                                   id="remember"
+                                   name="remember">
+                            <label class="form-check-label" for="remember">
+                                Remember me
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 mb-3">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        </button>
+                    </form>
+
+                    <hr>
+
+                    <div class="text-center">
+                        <p class="mb-0">Don't have an account?
+                            <a href="{{ url_for('auth.register') }}" class="text-decoration-none">
+                                Register here
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Demo Account Info -->
+            <div class="alert alert-success mt-3 text-center">
+                <i class="fas fa-user-check me-2"></i>
+                <strong>Demo Credentials (Pre-filled)</strong>
+                <hr class="my-2">
+                <div class="d-flex justify-content-center gap-3">
+                    <div>
+                        <small class="text-muted d-block">Username:</small>
+                        <strong>EthanWells10</strong>
+                    </div>
+                    <div class="border-start ps-3">
+                        <small class="text-muted d-block">Password:</small>
+                        <strong>GenerativeAI</strong>
+                    </div>
+                </div>
+                <small class="text-muted d-block mt-2">Just click the Login button!</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
